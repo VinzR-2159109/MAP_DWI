@@ -13,10 +13,17 @@ void setup() {
     // Tare the scale
     myScale.tare();
 
-    // Calibrate (example using a 100g weight)
-    Serial.println("Place a 22g weight on the scale.");
-    delay(5000); // Wait for the user to place the weight
-    myScale.calibrate(22.0f); // Assume 100g weight
+    // Calibrate
+    Serial.println("Place a 22g weight on the scale and press 'C' to calibrate.");
+    while (true) {
+        if (Serial.available() > 0) {
+            char key = Serial.read();
+            if (key == 'c') {
+                myScale.calibrate(22.0f);
+                break;
+            }
+        }
+    }
 }
 
 void loop() {
