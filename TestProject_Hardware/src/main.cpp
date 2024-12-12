@@ -1,40 +1,44 @@
-#include "HX711_Scale.cpp"
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+#include <Arduino.h>
 
-LoadCell myScale(2, 3);
+// Define the OLED display dimensions
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+
+// Create an instance for the SSD1306 display with I2C
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 void setup() {
-    Serial.begin(9600);
+  // Initialize Serial Monitor
+  Serial.begin(115200);
 
-    if (!myScale.isReady()) {
-        Serial.println("Error: HX711 is not ready!");
-        while (true);
-    }
+  // Initialize the display
+  if (!display.begin(0x3D)) {
+    Serial.println("SSD1306 allocation failed");
+    while (1);
+  }
 
-    // Tare the scale
-    myScale.tare();
+  // Clear the buffer
+  display.clearDisplay();
 
-    // Calibrate
-    Serial.println("Place a 22g weight on the scale and press 'C' to calibrate.");
-    while (true) {
-        if (Serial.available() > 0) {
-            char key = Serial.read();
-            if (key == 'c') {
-                myScale.calibrate(22.0f);
-                break;
-            }
-        }
-    }
+  // Display some text
+  display.setTextSize(1);            // Text size (1 = small, 2 = medium, etc.)
+  display.setTextColor(SSD1306_WHITE); // White color text
+  display.setCursor(0, 10);          // Position (x=0, y=10)
+  display.println("Hello, ESP32!");
+  display.display();                 // Render the text on the display
+
+  delay(2000); // Pause for 2 seconds
 }
 
 void loop() {
-    // Get the weight
-    float weight = myScale.getWeight();
-    if (weight >= 0) {
-        Serial.print("Weight: ");
-        Serial.print(weight, 2); // 2 decimal places
-        Serial.println(" g");
-    } else {
-        Serial.println("Error reading weight.");
-    }
-    delay(1000); // Read every second
+  // Update display content
+  display.clearDisplay();
+  display.setCursor(0, 10);
+  display.println("Counting:");
+  display.println(millis() / 1000); // Display time in seconds since boot
+  display.display();
+  delay(1000); // Update every second
 }
